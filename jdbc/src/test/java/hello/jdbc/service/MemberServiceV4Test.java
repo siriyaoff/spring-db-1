@@ -1,7 +1,7 @@
 package hello.jdbc.service;
 
 import hello.jdbc.domain.Member;
-import hello.jdbc.repository.MemberRepositoryV3;
+import hello.jdbc.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -19,17 +19,23 @@ import java.sql.SQLException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+/**
+ * Exception propagation 제거
+ * SQLException 제거
+ *
+ * MemberRepository 인터페이스 의존
+ */
 @Slf4j
 @SpringBootTest
-public class MemberServiceV3_4Test {
+public class MemberServiceV4Test {
 
     @Autowired
-    private MemberRepositoryV3 memberRepository;
+    private MemberRepository memberRepository;
     @Autowired
-    private MemberServiceV3_3 memberService;
+    private MemberServiceV4 memberService;
 
     @AfterEach
-    void after() throws SQLException {
+    void after() {
         memberRepository.delete("memberA");
         memberRepository.delete("memberB");
         memberRepository.delete("ex");
@@ -45,13 +51,13 @@ public class MemberServiceV3_4Test {
         }
 
         @Bean
-        MemberRepositoryV3 memberRepositoryV3() {
-            return new MemberRepositoryV3(dataSource);
+        MemberRepository memberRepository() {
+            return new MemberRepositoryV5(dataSource);
         }
 
         @Bean
-        MemberServiceV3_3 memberServiceV3_3() {
-            return new MemberServiceV3_3(memberRepositoryV3());
+        MemberServiceV4 memberServiceV4() {
+            return new MemberServiceV4(memberRepository());
         }
     }
 
@@ -65,7 +71,7 @@ public class MemberServiceV3_4Test {
 
     @Test
     @DisplayName("정상 이체")
-    void accountTransfer() throws SQLException {
+    void accountTransfer() {
         //given
         Member memberA = new Member("memberA", 10000);
         Member memberB = new Member("memberB", 10000);
@@ -84,7 +90,7 @@ public class MemberServiceV3_4Test {
 
     @Test
     @DisplayName("이체중 예외 발생")
-    void accountTransferEx() throws SQLException {
+    void accountTransferEx() {
         //given
         Member memberA = new Member("memberA", 10000);
         Member memberEx = new Member("ex", 10000);
